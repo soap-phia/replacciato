@@ -38,8 +38,6 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           makeLatest: true
           body: |
-            ## ${{ inputs.release_name }}
-            
             **Tag:** `${{ inputs.tag }}`
             **Commit:** ${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
