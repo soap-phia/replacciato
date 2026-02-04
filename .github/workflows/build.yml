@@ -1,0 +1,45 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag'
+        required: true
+        type: string
+      release_name:
+        description: 'Release name'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build
+        run: |
+          npm install
+          npm run build:all
+      
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.release_name }}
+          artifacts: "dist/*"
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          prerelease: ${{ inputs.prerelease }}
+          makeLatest: true
+          body: |
+            ## ${{ inputs.release_name }}
+            
+            **Tag:** `${{ inputs.tag }}`
+            **Commit:** ${{ github.sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
