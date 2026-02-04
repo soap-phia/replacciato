@@ -1,6 +1,6 @@
 # Replacciato
 
-Replaces Catpuccin themes with values of conforming themes if you don't want to manually change them yourself.
+Replaces Catpuccin themes with values of conforming themes ([Example](https://github.com/soap-phia/soap-theme/blob/main/theme.json)) if you don't want to manually change them yourself.
 
 ### Usage
 
