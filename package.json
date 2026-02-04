@@ -6,10 +6,10 @@
   "scripts": {
     "build:amd64": "cross-env GOOS=linux GOARCH=amd64 go build -o replacciato-linux-amd64 main.go",
     "build:windows:amd64": "cross-env GOOS=windows GOARCH=amd64 go build -o replacciato-windows-amd64-cli main.go",
-    "build:macos:amd64": "cross-env GOOS=darwin GOARCH=amd64 go build -o replacciato-windows-amd64-cli main.go",
+    "build:macos:amd64": "cross-env GOOS=darwin GOARCH=amd64 go build -o replacciato-macos-amd64-cli main.go",
     "build:arm": "cross-env GOOS=linux GOARCH=aarch64 go build -o replacciato-linux-aarch64 main.go",
     "build:windows:arm": "cross-env GOOS=windows GOARCH=aarch64 go build -o replacciato-windows-aarch64-cli main.go",
-    "build:macos:arm": "cross-env GOOS=darwin GOARCH=aarch64 go build -o replacciato-windows-aarch64-cli main.go",
+    "build:macos:arm": "cross-env GOOS=darwin GOARCH=aarch64 go build -o replacciato-macos-aarch64-cli main.go",
 	"build:all": "mkdir -p dist && build:amd64 && build:windows:amd64 && build:macos: && build:arm && build:windows:arm && build:macos:arm && mv replacciato-* dist/"
   },
   "dependencies": {

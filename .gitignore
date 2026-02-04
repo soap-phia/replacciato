@@ -1,2 +1,7 @@
-replacciato
+replacciato-linux-amd64
+replacciato-windows-amd64-cli
+replacciato-macos-amd64-cli
+replacciato-linux-aarch64
+replacciato-windows-aarch64-cli
+replacciato-macos-aarch64-cli
 node_modules
