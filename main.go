@@ -98,43 +98,95 @@ func process(path string, catpuccin map[string][]string, target map[string]strin
 		r, g, b := hexToRgb(newHex)
 		h, s, l := hexToHsl(newHex)
 
-		newRgb := fmt.Sprintf("rgb(%d, %d, %d)", r, g, b)
-		newRgbArray := fmt.Sprintf("[%d, %d, %d]", r, g, b)
-		newHsl := fmt.Sprintf("hsl(%ddeg, %d%%, %d%%)", h, s, l)
+		newRgb := fmt.Sprintf("%d, %d, %d", r, g, b)
+		newHsl := fmt.Sprintf("%d, %d, %d", h, s, l)
 
 		newColors[strings.ToLower(strings.ReplaceAll(newHex, " ", ""))] = true
 		newColors[strings.ToLower(strings.ReplaceAll(newRgb, " ", ""))] = true
-		newColors[strings.ToLower(strings.ReplaceAll(newRgbArray, " ", ""))] = true
 		newColors[strings.ToLower(strings.ReplaceAll(newHsl, " ", ""))] = true
 
 		for _, value := range values {
-			escCode := regexp.QuoteMeta(value)
-			regexPattern := strings.ReplaceAll(escCode, `\ `, `\s+`)
-			regexPattern = strings.ReplaceAll(regexPattern, `\n`, `\s*`)
-
-			reg := regexp.MustCompile(regexPattern)
-			if reg.MatchString(output) {
-				replacement := ""
-				if strings.HasPrefix(value, "#") {
-					replacement = newHex
-				} else if strings.HasPrefix(value, "rgb") {
-					replacement = newRgb
-					var rv, gv, bv int
-					_, err := fmt.Sscanf(value, "rgb(%d, %d, %d)", &rv, &gv, &bv)
-					if err == nil {
-						pattern := fmt.Sprintf(`\[\s*%d\s*,\s*%d\s*,\s*%d\s*\]`, rv, gv, bv)
+			if strings.HasPrefix(value, "#") {
+				escCode := regexp.QuoteMeta(value)
+				regexPattern := strings.ReplaceAll(escCode, `\ `, `\s+`)
+				reg := regexp.MustCompile(regexPattern)
+				if reg.MatchString(output) {
+					output = reg.ReplaceAllString(output, newHex)
+					changes = append(changes, changeRecord{old: value, new: newHex})
+				}
+			} else if strings.HasPrefix(value, "rgb") {
+				var rv, gv, bv int
+				_, err := fmt.Sscanf(value, "rgb(%d, %d, %d)", &rv, &gv, &bv)
+				if err == nil {
+					pattern := []string{
+						fmt.Sprintf(`rgb\(\s*%d\s*,\s*%d\s*,\s*%d\s*\)`, rv, gv, bv),
+						fmt.Sprintf(`\[\s*%d\s*,\s*%d\s*,\s*%d\s*\]`, rv, gv, bv),
+						fmt.Sprintf(`(?:^|[^\w])(%d\s*,\s*%d\s*,\s*%d)(?:[^\w%%]|$)`, rv, gv, bv),
+					}
+					
+					for _, pattern := range pattern {
 						regex := regexp.MustCompile(pattern)
-						if regex.MatchString(output) {
-							output = regex.ReplaceAllString(output, newRgbArray)
+						matches := regex.FindAllStringSubmatch(output, -1)
+						for _, match := range matches {
+							old := match[0]
+							if len(match) > 1 {
+								old = match[1]
+							}
+							
+							new := old
+							if strings.Contains(old, "rgb(") {
+								new = fmt.Sprintf("rgb(%s)", newRgb)
+							} else if strings.Contains(old, "[") {
+								new = fmt.Sprintf("[%s]", newRgb)
+							} else {
+								new = newRgb
+							}
+							
+							output = strings.Replace(output, old, new, 1)
+							changes = append(changes, changeRecord{old: old, new: new})
 						}
 					}
-				} else if strings.HasPrefix(value, "hsl") {
-					replacement = newHsl
 				}
-
-				if replacement != "" {
-					output = reg.ReplaceAllString(output, replacement)
-					changes = append(changes, changeRecord{old: value, new: replacement})
+			} else if strings.HasPrefix(value, "hsl") {
+				var hv, sv, lv int
+				_, err := fmt.Sscanf(value, "hsl(%ddeg, %d%%, %d%%)", &hv, &sv, &lv)
+				if err != nil {
+					_, err = fmt.Sscanf(value, "hsl(%d, %d%%, %d%%)", &hv, &sv, &lv)
+				}
+				if err == nil {
+					newHsl := fmt.Sprintf("%d, %d, %d", h, s, l)
+					pattern := []string{
+						fmt.Sprintf(`hsl\(\s*%d(?:deg)?\s*,\s*%d%%\s*,\s*%d%%\s*\)`, hv, sv, lv),
+						fmt.Sprintf(`\[\s*%d\s*,\s*%d\s*,\s*%d\s*\]`, hv, sv, lv),
+						fmt.Sprintf(`(?:^|[^\w])(%d\s*,\s*%d\s*,\s*%d)(?:\s*%%|[^\w\d]|$)`, hv, sv, lv),
+					}
+					
+					for _, pattern := range pattern {
+						regex := regexp.MustCompile(pattern)
+						matches := regex.FindAllStringSubmatch(output, -1)
+						for _, match := range matches {
+							old := match[0]
+							if len(match) > 1 && match[1] != "" {
+								old = match[1]
+							}
+							
+							new := old
+							if strings.Contains(old, "hsl(") {
+								if strings.Contains(strings.ToLower(output[:strings.Index(output, old)+len(old)]), "deg") {
+									new = fmt.Sprintf("hsl(%ddeg, %d%%, %d%%)", h, s, l)
+								} else {
+									new = fmt.Sprintf("hsl(%d, %d%%, %d%%)", h, s, l)
+								}
+							} else if strings.Contains(old, "[") {
+								new = fmt.Sprintf("[%s]", newHsl)
+							} else {
+								new = newHsl
+							}
+							
+							output = strings.Replace(output, old, new, 1)
+							changes = append(changes, changeRecord{old: old, new: new})
+						}
+					}
 				}
 			}
 		}
@@ -148,7 +200,7 @@ func process(path string, catpuccin map[string][]string, target map[string]strin
 				for _, c := range changes {
 					fmt.Printf("  \033[32m%s -> %s\033[0m\n", c.old, c.new)
 				}
-				colorRegex := regexp.MustCompile(`(#[A-Fa-f0-9]{3,6}|rgb\([^\)]+\)|hsl\([^\)]+\)|\[\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\])`)
+				colorRegex := regexp.MustCompile(`(#[A-Fa-f0-9]{3,6}|rgb\([^\)]+\)|hsl\([^\)]+\)|\[\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\]|\b\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\b)`)
 				remaining := colorRegex.FindAllString(output, -1)
 				seen := make(map[string]bool)
 				for _, found := range remaining {
