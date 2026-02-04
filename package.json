@@ -7,9 +7,9 @@
     "build:amd64": "cross-env GOOS=linux GOARCH=amd64 go build -o replacciato-linux-amd64 main.go",
     "build:windows:amd64": "cross-env GOOS=windows GOARCH=amd64 go build -o replacciato-windows-amd64-cli main.go",
     "build:macos:amd64": "cross-env GOOS=darwin GOARCH=amd64 go build -o replacciato-macos-amd64-cli main.go",
-    "build:arm": "cross-env GOOS=linux GOARCH=aarch64 go build -o replacciato-linux-aarch64 main.go",
-    "build:windows:arm": "cross-env GOOS=windows GOARCH=aarch64 go build -o replacciato-windows-aarch64-cli main.go",
-    "build:macos:arm": "cross-env GOOS=darwin GOARCH=aarch64 go build -o replacciato-macos-aarch64-cli main.go",
+    "build:arm": "cross-env GOOS=linux GOARCH=arm64 go build -o replacciato-linux-arm64 main.go",
+    "build:windows:arm": "cross-env GOOS=windows GOARCH=arm64 go build -o replacciato-windows-arm64-cli main.go",
+    "build:macos:arm": "cross-env GOOS=darwin GOARCH=arm64 go build -o replacciato-macos-arm64-cli main.go",
 	"build:all": "mkdir -p dist && npm run build:amd64 && npm run build:windows:amd64 && npm run build:macos:amd64 && npm run build:arm && npm run build:windows:arm && npm run build:macos:arm && mv replacciato-* dist/"
   },
   "dependencies": {

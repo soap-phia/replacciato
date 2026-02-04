@@ -5,6 +5,14 @@ Replaces Catpuccin themes with values of conforming themes ([Example](https://gi
 ### Usage
 
 ```bash
+./replacciato --path <file or dir> --theme <theme>.json --type <latte,frappe,macchiato,mocha>
+```
+
+#### Downloads
+Downloads at https://github.com/soap-phia/replacciato/releases
+
+#### Building
+```bash
 npm install
 # CHOOSE YOUR ARCH AND SYSTEM
 npm run build:amd64
@@ -15,10 +23,6 @@ npm run build:windows:arm64
 npm run build:macos:arm64
 # OR, TO JUST MATCH YOUR SYSTEM ARCH
 go build -o replacciato main.go
-```
-
-```bash
-./replacciato --path <file or dir> --theme <theme>.json --type <latte,frappe,macchiato,mocha>
 ```
 
 ### Currently Supports:
